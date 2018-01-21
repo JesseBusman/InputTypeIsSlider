@@ -50,6 +50,8 @@ window.addEventListener("load", function(){
 					sliderKnob.style.position = "relative";
 					sliderKnob.style.top = "-20px";
 					sliderKnob.style.opacity = 0.5;
+					sliderKnob.style.transitionProperty = "left";
+					sliderKnob.style.transitionDuration = "0.1s";
 				}
 				slider.appendChild(sliderKnob);
 				
@@ -110,12 +112,6 @@ window.addEventListener("load", function(){
 						var oldValue = slider._theValue;
 						if (slider.hasOwnProperty("step"))
 						{
-							console.log("newValue: "+(newValue));
-							console.log("oldValue: "+(oldValue));
-							console.log("step: "+(newValue - oldValue));
-							console.log("step: "+((newValue - oldValue)/slider.step));
-							console.log("step: "+Math.round((newValue - oldValue)/slider.step));
-							console.log("step="+slider.step+" affected newValue to be "+newValue);
 							newValue = oldValue + Math.round((newValue - oldValue)/slider.step)*slider.step;
 						}
 						slider._theValue = newValue;
