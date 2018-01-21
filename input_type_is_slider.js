@@ -152,7 +152,8 @@ window.addEventListener("load", function(){
 					}
 				});
 				
-				slider.addEventListener = function(event, callback) // lol
+				var oldAddEventListener = slider.addEventListener;
+				slider.addEventListener = function(event, callback) // not lol?
 				{
 					if (event === "change")
 					{
@@ -160,7 +161,8 @@ window.addEventListener("load", function(){
 					}
 					else
 					{
-						throw "Event '"+event+"' is not implemented by <input type='slider'>. Try 'change'.";
+						oldAddEventListener(event, callback);
+						//throw "Event '"+event+"' is not implemented by <input type='slider'>. Try 'change'.";
 					}
 				};
 			}
