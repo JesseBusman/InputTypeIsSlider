@@ -5,6 +5,7 @@ window.addEventListener("load", function(){
 		var el = inputs[i];
 		if (el.getAttribute("type") === "slider")
 		{
+			var formInputHidden = null;
 			var slider = document.createElement("div");
 			{
 				slider.style.height = "0px";
@@ -24,8 +25,17 @@ window.addEventListener("load", function(){
 					if (key === "type") continue;
 					else if (key === "min") value = parseFloat(value);
 					else if (key === "max") value = parseFloat(value);
+					else if (key === "step") value = parseFloat(value);
 					else if (key === "value") value = parseFloat(value);
 					else if (key === "width") value = parseFloat(value);
+					else if (key === "name")
+					{
+						formInputHidden = document.createElement("input");
+						formInputHidden.setAttribute("type", "hidden");
+						formInputHidden.setAttribute("name", value);
+						el.parentNode.appendChild(formInputHidden);
+						continue;
+					}
 					else continue;
 					slider.setAttribute(key, value);
 					slider[key] = value;
@@ -87,6 +97,8 @@ window.addEventListener("load", function(){
 				
 				var slideDistance = parseInt(slider.width - parseInt(sliderKnob.style.width));
 				
+				slider._theValue = slider._initValue;
+				
 				Object.defineProperty(slider, "value", {
 					get: function() { return slider._theValue; },
 					set: function(newValue)
@@ -96,14 +108,26 @@ window.addEventListener("load", function(){
 						if (newValue < slider.min) newValue = slider.min;
 						if (newValue > slider.max) newValue = slider.max;
 						var oldValue = slider._theValue;
+						if (slider.hasOwnProperty("step"))
+						{
+							console.log("newValue: "+(newValue));
+							console.log("oldValue: "+(oldValue));
+							console.log("step: "+(newValue - oldValue));
+							console.log("step: "+((newValue - oldValue)/slider.step));
+							console.log("step: "+Math.round((newValue - oldValue)/slider.step));
+							console.log("step="+slider.step+" affected newValue to be "+newValue);
+							newValue = oldValue + Math.round((newValue - oldValue)/slider.step)*slider.step;
+						}
 						slider._theValue = newValue;
+						
 						/*setTimeout(function(){
 							console.log("slider.clientWidth="+slider.clientWidth);
 							console.log("slider.offsetWidth="+slider.offsetWidth);
 							console.log("slider.getBoundingClientRect().width="+slider.getBoundingClientRect().width);
 						}, 1000);*/
 						sliderKnob.style.left = ((newValue-slider.min) / (slider.max-slider.min) * slideDistance) + "px";
-						console.log("knob now at: "+sliderKnob.style.left);
+						if (formInputHidden != null) formInputHidden.value = newValue;
+						//console.log("knob now at: "+sliderKnob.style.left);
 						if (newValue != oldValue)
 						{
 							for (var i=0; i<slider._onChangeCallbacks.length; i++)
@@ -134,19 +158,21 @@ window.addEventListener("load", function(){
 					return false;
 				});
 				document.addEventListener("mouseout", function(e){
-					if (dragging)
+					var from = e.relatedTarget || e.toElement;
+					if (!from || from.nodeName == "HTML")
 					{
-						dragging = false;
-						console.log("Stopped dragging because of mouseout");
-						e.preventDefault();
-						return false;
+						if (dragging)
+						{
+							dragging = false;
+							e.preventDefault();
+							return false;
+						}
 					}
 				});
 				document.addEventListener("mouseup", function(e){
 					if (dragging)
 					{
 						dragging = false;
-						console.log("Stopped dragging because of mouseup");
 						e.preventDefault();
 						return false;
 					}
